@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import {
-  ColumnDef,
   ColumnFiltersState,
   SortingState,
   VisibilityState,
@@ -13,16 +12,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -37,8 +33,7 @@ import {
 import { AddFile } from "./AddFile";
 import { useQuery } from "react-query";
 import { fetchFiles } from "@/services/fetchFiles";
-import Link from "next/link";
-import { DropdownMenuLabel } from "@radix-ui/react-dropdown-menu";
+import { columns } from "@/components/structures/FilesList/TableColumns";
 
 export type File = {
   id: string;
@@ -48,112 +43,6 @@ export type File = {
   createdAt: string;
   url: string;
 };
-
-export const columns: ColumnDef<File>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    id: "id",
-    accessorKey: "id",
-    enableSorting: false,
-    enableHiding: true,
-  },
-  {
-    accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Nome arquivo
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div className="">{row.getValue("name")}</div>,
-  },
-  {
-    accessorKey: "createdAt",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Data de criação
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"));
-      return <div className="">{date.toDateString()}</div>;
-    },
-  },
-  {
-    accessorKey: "contentType",
-    header: () => {
-      return <p>Tipo de arquivo</p>;
-    },
-    cell: ({ row }) => <div className="">{row.getValue("contentType")}</div>,
-  },
-  {
-    accessorKey: "url",
-    enableHiding: false,
-    cell: ({ row }) => {
-      return (
-        <Button variant="outline">
-          <Link target="_blank" href={row.getValue("url")}>
-            Baixar
-          </Link>
-        </Button>
-      );
-    },
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Deletar</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
 
 export function FilesList() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -166,7 +55,7 @@ export function FilesList() {
 
   const [data, setData] = React.useState<File[]>([]);
 
-  const { data: fileData } = useQuery("files", fetchFiles, {});
+  const { data: fileData } = useQuery("files", fetchFiles);
 
   React.useEffect(() => {
     if (fileData) {
@@ -295,7 +184,7 @@ export function FilesList() {
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            Anterior
           </Button>
           <Button
             variant="outline"
@@ -303,7 +192,7 @@ export function FilesList() {
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            Próxima
           </Button>
         </div>
       </div>

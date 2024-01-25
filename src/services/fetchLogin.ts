@@ -18,8 +18,8 @@ export const fetchLogin = async ({
       }
     );
 
-    if (!res.ok) {
-      throw new Error("Error fetching login");
+    if (!res || !res.ok) {
+      throw new Error("Email ou senha incorretos");
     }
 
     return res;

@@ -18,8 +18,13 @@ export function AddFile() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const resetState = () => {
+    setFiles(null);
+    setLoading(false);
+    setSuccess(false);
+  };
+
+  const handleSubmit = async () => {
     if (!files) return;
 
     const file = files[0];
@@ -60,7 +65,7 @@ export function AddFile() {
       <DrawerTrigger asChild>
         <Button>Adicionar arquivo</Button>
       </DrawerTrigger>
-      <DrawerContent>
+      <DrawerContent onCloseAutoFocus={resetState}>
         <div className="mx-auto max-w-sm">
           <DrawerHeader>
             <DrawerTitle>Adicionar arquivo</DrawerTitle>
@@ -68,7 +73,7 @@ export function AddFile() {
               Arraste seus arquivos para a área de transferência
             </DrawerDescription>
           </DrawerHeader>
-          {/* <Dropzone onDrop={(acceptedFiles) => setFiles(acceptedFiles)}>
+          <Dropzone onDrop={(acceptedFiles: any) => setFiles(acceptedFiles)}>
             {({ getRootProps, getInputProps }) => (
               <section className="bg-white hover:bg-slate-100 pointer flex justify-center items-center p-4 h-[150px] border border-dashed">
                 <div {...getRootProps()}>
@@ -81,24 +86,14 @@ export function AddFile() {
                 </div>
               </section>
             )}
-          </Dropzone> */}
-          <div>
-            <form action="" onSubmit={handleSubmit}>
-              <input
-                type="file"
-                name="file"
-                onChange={(e) => setFiles(e.target.files)}
-              />
-              <Button>Enviar</Button>
-            </form>
-          </div>
+          </Dropzone>
           <DrawerFooter className="flex flex-row">
             <DrawerClose asChild>
               <Button className="w-full" variant="outline">
                 Cancel
               </Button>
             </DrawerClose>
-            <Button onClick={handleSubmit} className="w-full">
+            <Button type="submit" className="w-full" onClick={handleSubmit}>
               Enviar
             </Button>
           </DrawerFooter>

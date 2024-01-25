@@ -1,4 +1,4 @@
-import { FilesList } from "@/components/structures/FilesList";
+import { FilesList } from "@/components/structures/FilesList/index";
 
 export default function FilesPage() {
   return (
