@@ -27,32 +27,29 @@ export function AddFile() {
   const handleSubmit = async () => {
     if (!files) return;
 
-    const file = files[0];
-
-    console.log({ file });
-
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/upload`,
-      {
-        fileName: file.name,
-        contentType: file.type,
-      }
-    );
-
-    setLoading(true);
-
-    axios
-      .put(res.data.presignedUrl, file, {
-        headers: {
-          "Content-Type": file.type,
-        },
-      })
-      .then((res) => {
-        if (res) {
-          setSuccess(true);
+    Array.from(files).forEach(async (file) => {
+      setLoading(true);
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/upload`,
+        {
+          fileName: file.name,
+          contentType: file.type,
         }
-      })
-      .finally(() => setLoading(false));
+      );
+
+      axios
+        .put(res.data.presignedUrl, file, {
+          headers: {
+            "Content-Type": file.type,
+          },
+        })
+        .then((res) => {
+          if (res) {
+            setSuccess(true);
+          }
+        })
+        .finally(() => setLoading(false));
+    });
   };
 
   useEffect(() => {
@@ -79,7 +76,11 @@ export function AddFile() {
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
                   <p>
-                    {files?.[0] ? files?.[0]?.name : "Área de transferência"}
+                    {files
+                      ? files?.length > 1
+                        ? `${files?.length} arquivos selecionados`
+                        : files?.[0]?.name
+                      : "Arraste e solte seus arquivos aqui"}
                   </p>
                   {loading && <p>Enviando...</p>}
                   {success && <p>Arquivo enviado com sucesso!</p>}
