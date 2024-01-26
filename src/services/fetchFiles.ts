@@ -14,7 +14,7 @@ export const fetchFiles = async () => {
       throw new Error("Error fetching files");
     }
 
-    return res.json() as Promise<File[]>;
+    return res.json() as Promise<{ files: File[]; count: number }>;
   } catch (e) {
     throw new Error("Error fetching files");
   }

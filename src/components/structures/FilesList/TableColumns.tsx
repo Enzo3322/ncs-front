@@ -48,7 +48,15 @@ export const columns: ColumnDef<File | any>[] = [
     },
     cell: ({ row }) => {
       const date = new Date(row.getValue("createdAt"));
-      return <div className="">{date.toDateString()}</div>;
+
+      const formatDate = new Intl.DateTimeFormat("pt-BR", {
+        day: "numeric",
+        month: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      });
+      return <div className="">{formatDate.format(date)}</div>;
     },
   },
   {
@@ -61,6 +69,9 @@ export const columns: ColumnDef<File | any>[] = [
   {
     accessorKey: "url",
     enableHiding: false,
+    header: () => {
+      return <p>Baixar</p>;
+    },
     cell: ({ row }) => {
       return (
         <Button variant="outline">
@@ -74,6 +85,9 @@ export const columns: ColumnDef<File | any>[] = [
   {
     accessorKey: "key",
     enableHiding: false,
+    header: () => {
+      return <p>Ações</p>;
+    },
     cell: ({ row }) => {
       return (
         <DropdownMenu>

@@ -1,3 +1,4 @@
+import { AuthViewWrapper } from "@/components/secure/AuthViewWrapper";
 import { Toaster } from "@/components/ui/toaster";
 import AuthProvider from "@/context/authContext";
 import "@/styles/globals.css";
@@ -10,8 +11,10 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient} contextSharing={true}>
       <AuthProvider>
-        <Component {...pageProps} />
-        <Toaster />
+        <AuthViewWrapper>
+          <Component {...pageProps} />
+          <Toaster />
+        </AuthViewWrapper>
       </AuthProvider>
     </QueryClientProvider>
   );

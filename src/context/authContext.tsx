@@ -1,3 +1,4 @@
+import { toast } from "@/components/ui/use-toast";
 import { fetchWhoAmI } from "@/services/fetchWhoAmI";
 import { useRouter } from "next/router";
 import React, { createContext } from "react";
@@ -16,10 +17,17 @@ export const AuthContext = createContext<AuthContextType>({
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { push } = useRouter();
+  const { push, pathname } = useRouter();
 
   const { data, isLoading, isError } = useQuery("auth", fetchWhoAmI, {
     onError: () => {
+      if (pathname === "/") return;
+      toast({
+        title: "Erro de autenticação",
+        description: "Você não está autenticado, por favor faça login",
+        duration: 5000,
+        variant: "destructive",
+      });
       push("/");
     },
     retry: false,

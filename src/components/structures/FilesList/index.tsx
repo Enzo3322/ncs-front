@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
   ColumnFiltersState,
   SortingState,
@@ -13,6 +12,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown } from "lucide-react";
+import { AiOutlineLoading3Quarters, AiOutlineReload } from "react-icons/ai";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,9 +31,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AddFile } from "./AddFile";
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { fetchFiles } from "@/services/fetchFiles";
 import { columns } from "@/components/structures/FilesList/TableColumns";
+import { useEffect, useState } from "react";
 
 export type File = {
   id: string;
@@ -45,23 +46,28 @@ export type File = {
 };
 
 export function FilesList() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
 
-  const [data, setData] = React.useState<File[]>([]);
+  const [data, setData] = useState<File[]>([]);
 
-  const { data: fileData } = useQuery("files", fetchFiles);
+  const {
+    mutate,
+    data: fileData,
+    isLoading,
+  } = useMutation("files", fetchFiles, {});
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (fileData) {
-      setData(fileData);
+      setData(fileData.files);
     }
   }, [fileData]);
+
+  useEffect(() => {
+    mutate();
+  }, []);
 
   const table = useReactTable({
     data,
@@ -80,11 +86,12 @@ export function FilesList() {
       columnVisibility,
       rowSelection,
     },
+    pageCount: 2,
   });
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 w-full">
         <Input
           placeholder="Filtrar pelo nome do arquivo..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -99,6 +106,9 @@ export function FilesList() {
               Colunas <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
+          <Button variant="outline" onClick={() => mutate()} className="mr-4">
+            <AiOutlineReload />
+          </Button>
           <AddFile />
 
           <DropdownMenuContent align="end">
@@ -122,61 +132,63 @@ export function FilesList() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+      <div className="rounded-md border w-full">
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64 w-full">
+            <AiOutlineLoading3Quarters size={22} className="animate-spin" />
+          </div>
+        ) : (
+          <Table className="">
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  Nenhum resultado.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    Nenhum resultado.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
         <div className="space-x-2">
           <Button
             variant="outline"

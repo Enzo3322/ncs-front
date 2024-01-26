@@ -11,7 +11,11 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 
-export function DeleteFileDialog({ fileKey }: { fileKey: string }) {
+interface DeleteFileDialogProps {
+  fileKey: string;
+}
+
+export function DeleteFileDialog({ fileKey }: DeleteFileDialogProps) {
   const handleDelete = async () => {
     const res = await axios.delete(
       `${process.env.NEXT_PUBLIC_API_URL}/api/v1/uploads/${fileKey}`,
@@ -24,6 +28,7 @@ export function DeleteFileDialog({ fileKey }: { fileKey: string }) {
       toast({
         title: "Erro ao deletar arquivo",
         description: "Tente novamente mais tarde",
+        duration: 5000,
       });
       return;
     }
@@ -31,6 +36,7 @@ export function DeleteFileDialog({ fileKey }: { fileKey: string }) {
     toast({
       title: "Arquivo deletado com sucesso",
       description: "O arquivo foi deletado com sucesso!",
+      duration: 5000,
     });
   };
 

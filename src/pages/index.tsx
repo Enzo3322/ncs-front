@@ -1,26 +1,29 @@
 import { toast } from "@/components/ui/use-toast";
 import { fetchLogin } from "@/services/fetchLogin";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useMutation } from "react-query";
 
 export default function Home() {
   const { push } = useRouter();
 
-  const {
-    mutate: loginHandler,
-    isError: loginError,
-    isLoading: loginLoading,
-  } = useMutation(fetchLogin, {
-    onSuccess: () => {
-      push("/arquivos");
-    },
-    onError: (error) => {
-      console.log({ error });
-      // response.status === 401 && toast({ variant: "destructive" });
-    },
-  });
+  const { mutate: loginHandler, isLoading: loginLoading } = useMutation(
+    fetchLogin,
+    {
+      onSuccess: () => {
+        push("/arquivos");
+      },
+      onError: (error) => {
+        toast({
+          variant: "destructive",
+          title: "Email e/ou senha incorretos",
+          description:
+            "Tente novamente, caso o erro persista, contate o suporte para evitar que seu IP seja bloqueado.",
+          duration: 5000,
+        });
+      },
+    }
+  );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,17 +34,6 @@ export default function Home() {
 
     loginHandler({ email: email.value, password: password.value });
   };
-
-  useEffect(() => {
-    if (loginError) {
-      toast({
-        variant: "destructive",
-        title: "Email e/ou senha incorretos",
-        description:
-          "Tente novamente, caso o erro persista, contate o suporte para evitar que seu IP seja bloqueado.",
-      });
-    }
-  }, [loginError]);
 
   return (
     <main className="h-screen w-screen flex items-center justify-center bg-[#25266a]">
